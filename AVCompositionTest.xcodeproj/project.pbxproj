@@ -17,6 +17,8 @@
 		608C6DB31B008C93003F694A /* Composition.m in Sources */ = {isa = PBXBuildFile; fileRef = 608C6DB21B008C93003F694A /* Composition.m */; };
 		608C6DB81B01C108003F694A /* FurShader.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 608C6DB61B01C108003F694A /* FurShader.mp4 */; };
 		608C6DB91B01C108003F694A /* URLHookmark.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 608C6DB71B01C108003F694A /* URLHookmark.mp4 */; };
+		E6AA85AC1CE1D0CD00A586A5 /* CamelliaTestMovie.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6AA85AB1CE1D0CD00A586A5 /* CamelliaTestMovie.mp4 */; };
+		E6AA85AE1CE1D10700A586A5 /* Sample_movie-sound.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +49,8 @@
 		608C6DB21B008C93003F694A /* Composition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Composition.m; sourceTree = "<group>"; };
 		608C6DB61B01C108003F694A /* FurShader.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FurShader.mp4; sourceTree = "<group>"; };
 		608C6DB71B01C108003F694A /* URLHookmark.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = URLHookmark.mp4; sourceTree = "<group>"; };
+		E6AA85AB1CE1D0CD00A586A5 /* CamelliaTestMovie.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = CamelliaTestMovie.mp4; sourceTree = "<group>"; };
+		E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Sample_movie-sound.mp4"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +99,8 @@
 				608C6D911B008C60003F694A /* Main.storyboard */,
 				608C6D941B008C60003F694A /* Images.xcassets */,
 				608C6D961B008C60003F694A /* LaunchScreen.xib */,
+				E6AA85AB1CE1D0CD00A586A5 /* CamelliaTestMovie.mp4 */,
+				E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */,
 				608C6DB61B01C108003F694A /* FurShader.mp4 */,
 				608C6DB71B01C108003F694A /* URLHookmark.mp4 */,
 				608C6D871B008C60003F694A /* Supporting Files */,
@@ -214,6 +220,8 @@
 				608C6D931B008C60003F694A /* Main.storyboard in Resources */,
 				608C6D981B008C60003F694A /* LaunchScreen.xib in Resources */,
 				608C6D951B008C60003F694A /* Images.xcassets in Resources */,
+				E6AA85AE1CE1D10700A586A5 /* Sample_movie-sound.mp4 in Resources */,
+				E6AA85AC1CE1D0CD00A586A5 /* CamelliaTestMovie.mp4 in Resources */,
 				608C6DB81B01C108003F694A /* FurShader.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -432,6 +440,7 @@
 				608C6DA91B008C60003F694A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		608C6DAA1B008C60003F694A /* Build configuration list for PBXNativeTarget "AVCompositionTestTests" */ = {
 			isa = XCConfigurationList;
@@ -440,6 +449,7 @@
 				608C6DAC1B008C60003F694A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

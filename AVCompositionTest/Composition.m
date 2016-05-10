@@ -10,6 +10,8 @@
 @end
 
 
+// WIP 自身での書き出しについて、慣れる！
+
 @implementation Composition
 
 - (void)create:(void (^)(NSURL *url))handler
@@ -25,9 +27,25 @@
     /////////////////////////////////////////////////////////////////////////////
     // 手順2
     
+    //WIP
+    //prepare the in and outfiles
+    
+    //AVAudioFile* inFile = [[AVAudioFile alloc] initForReading:self.movieFile1 error:nil];
+    //http://stackoverflow.com/questions/35581531/cant-reverse-avasset-audio-properly-the-only-result-is-white-noise
+    
+    
+    
+//AVAsset: 各ビデオ素材の入れ物、テイクトラックと思って良い。
+    
+//    // AVAssetをURLから取得
+//    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:self.movieFile1 options:nil];
+//    AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:self.movieFile2 options:nil];
+    
     // AVAssetをURLから取得
-    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:self.movieFile1 options:nil];
-    AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:self.movieFile2 options:nil];
+    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:self.movieFileForAudio options:nil];
+    AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:self.videoFileFromRecSample options:nil];
+    
+    
     
     // アセットから動画・音声トラックをそれぞれ取得
     AVAssetTrack *videoAssetTrack1 = [videoAsset1 tracksWithMediaType:AVMediaTypeVideo][0];
@@ -37,6 +55,11 @@
     AVAssetTrack *audioAssetTrack2 = [videoAsset2 tracksWithMediaType:AVMediaTypeAudio][0];
     
     /////////////////////////////////////////////////////////////////////////////
+    
+//AVMutableCompositionTrack Processing
+    //そのテイクから、マスターTrackを生成するにあたって、どのような並びで配置するか、どの音声ファイルを作成するか、を指定している。
+    //おそらく、この段階では合成処理はされていない。あくまで「シーケンスの配置」
+    
     // 手順3
     
     // 動画合成用の`AVMutableCompositionTrack`を生成
@@ -55,26 +78,37 @@
                                    ofTrack:videoAssetTrack1
                                     atTime:kCMTimeZero
                                      error:nil];
-    // ひとつめの音声をトラックに追加
-    [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrack1.timeRange.duration)
-                                   ofTrack:audioAssetTrack1
-                                    atTime:kCMTimeZero
-                                     error:nil];
     
-    // ふたつめの動画を追加
-    // `videoAssetTrack2`の動画の長さ分を`videoAssetTrack1`の終了時間の後ろに挿入
-    [compositionVideoTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAssetTrack2.timeRange.duration)
-                                   ofTrack:videoAssetTrack2
-                                    atTime:videoAssetTrack1.timeRange.duration
-                                     error:nil];
-    // ふたつめの音声を追加
+//    // ふたつめの動画を追加
+//    // `videoAssetTrack2`の動画の長さ分を`videoAssetTrack1`の終了時間の後ろに挿入
+//    [compositionVideoTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAssetTrack2.timeRange.duration)
+//                                   ofTrack:videoAssetTrack2
+//                                    atTime:videoAssetTrack1.timeRange.duration
+//                                     error:nil];
+    
+    
+    
+//AudioTrackの並びを編集する。
+    
+    // ひとつめの音声をトラックに追加
     [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrack2.timeRange.duration)
                                    ofTrack:audioAssetTrack2
-                                    atTime:audioAssetTrack1.timeRange.duration
+                                    atTime:kCMTimeZero
                                      error:nil];
+//    // ふたつめの音声を追加
+//    [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrack1.timeRange.duration)
+//                                   ofTrack:audioAssetTrack1
+//                                    atTime:audioAssetTrack2.timeRange.duration
+//                                     error:nil];
     
     /////////////////////////////////////////////////////////////////////////////
     // 手順5
+    
+//WIP::合成用の前処理について
+    
+    //WIP::ここで再生秒数の長さとか指定している感じ。
+        // - 単純に音をカットしたらどうなるだろうか。最後のサンプルフレームで終了する。
+    
     
     // Video1の合成命令用オブジェクトを生成
     AVMutableVideoCompositionInstruction *mutableVideoCompositionInstruction1 = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
@@ -205,6 +239,30 @@
         }
     }];
 }
+
+//MARK:: TEST MIX DATA
+    //1. 作成した動画にて、自由にコントロールしてみる。
+    //2. 動画に『音楽で」当て込んでみる。
+        //その知識を基に、ライブラリの仕様を確認
+        //実実装を試す。
+
+
+- (NSURL *)movieFileForAudio
+{
+    NSBundle *bundle = NSBundle.mainBundle;
+    NSString *path = [bundle pathForResource:@"CamelliaTestMovie" ofType:@"mp4"];
+    NSURL *url = [NSURL fileURLWithPath:path];
+    return url;
+}
+
+- (NSURL *)videoFileFromRecSample
+{
+    NSBundle *bundle = NSBundle.mainBundle;
+    NSString *path = [bundle pathForResource:@"Sample_movie-sound" ofType:@"mp4"];
+    NSURL *url = [NSURL fileURLWithPath:path];
+    return url;
+}
+
 
 
 /**
