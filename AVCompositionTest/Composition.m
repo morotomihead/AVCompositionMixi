@@ -17,9 +17,9 @@
     // その情報を基に、コードをいじり下記をテストします。
 
 
-    // - サウンドの長さ主体で、動画を切る　＞＞そのために動画をもう一つ用意で、１つを書き出せるか。
-    // - ビデオ環境音を合成した動画の書き出し
-    //
+    // OK サウンドの長さ主体で、動画を切る
+    // OK ビデオ環境音を合成した動画の書き出し　（合わせて音量バランス調整）
+    // OK 画像から動画を生成して撮影動画ラストにインサートしてコンバート
 
 /*
  AVMutableComposition       : iMovieで言うプロジェクト。このProject内で、各トラックを編集する。
@@ -61,11 +61,8 @@ const int kVideoFPS = 30;
     
     //WIP
     //prepare the in and outfiles
-    
     //AVAudioFile* inFile = [[AVAudioFile alloc] initForReading:self.movieFile1 error:nil];
     //http://stackoverflow.com/questions/35581531/cant-reverse-avasset-audio-properly-the-only-result-is-white-noise
-    
-    
     
 //AVAsset: 各ビデオ素材の入れ物、テイクトラックと思って良い。
     
@@ -99,51 +96,35 @@ const int kVideoFPS = 30;
     // 音声合成用の`AVMutableCompositionTrack`を生成
     AVMutableCompositionTrack *compositionAudioTrack = [mutableComposition addMutableTrackWithMediaType:AVMediaTypeAudio
                                                                                        preferredTrackID:kCMPersistentTrackID_Invalid];
-    
-        /////////////////////////////////////////////////////////////////////////////
-        // 手順4
-        //※単純に元動画をクロップして繋ぎ合わせたい場合は、AVMutableCompositionTrackにAVAssetTrackをどんどん追加すれば良い。
+    // 環境音合成用の`AVMutableCompositionTrack`を生成
+    AVMutableCompositionTrack *compositionFieldTrack = [mutableComposition addMutableTrackWithMediaType:AVMediaTypeAudio
+                                                                                       preferredTrackID:kCMPersistentTrackID_Invalid];
+    /////////////////////////////////////////////////////////////////////////////
+    // 手順4
     
 //VideoTrackの並びを編集する
-    
     // ひとつめの動画をトラックに追加
-    // `videoAssetTrack1`の動画の長さ分を`kCMTimeZero`の位置に挿入
     [compositionVideoTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAssetTrack1.timeRange.duration)
                                    ofTrack:videoAssetTrack1
                                     atTime:kCMTimeZero
                                      error:nil];
     
-    // ふたつめの動画を追加　：ケースとしては最後のタイトル文言の動画を挿入
-    // `videoAssetTrack2`の動画の長さ分を`videoAssetTrack1`の終了時間の後ろに挿入
-    //    [compositionVideoTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAssetTrack2.timeRange.duration)
-    //                                   ofTrack:videoAssetTrack2
-    //                                    atTime:videoAssetTrack1.timeRange.duration
-    //                                     error:nil];
+    // ふたつめの動画をトラックに追加
+        //長さを調整(TEST・オーディオの尺に合わせ動画をトリム）ケースとしては最後のタイトル文言の動画を挿入
+        Float64 audioDuration = CMTimeGetSeconds(audioAssetTrackBGM.timeRange.duration);
+        Float64 mainVideoDuration = CMTimeGetSeconds(videoAssetTrack1.timeRange.duration);
+        Float64 dulation = audioDuration - mainVideoDuration;
+        CMTime endingVideoRangeDuration = CMTimeMakeWithSeconds(dulation, kVideoFPS);
     
-    
-    //長さを調整(TEST・オーディオの尺に合わせ動画をトリム）: audioAssetTrack.timeRange.duration -  videoAssetTrack1.timeRange.duration
-    Float64 audioDuration = CMTimeGetSeconds(audioAssetTrackBGM.timeRange.duration);
-    Float64 mainVideoDuration = CMTimeGetSeconds(videoAssetTrack1.timeRange.duration);
-    Float64 dulation = audioDuration - mainVideoDuration;
-    CMTime endingVideoRangeDuration = CMTimeMakeWithSeconds(dulation, kVideoFPS);
-    
+    //`videoAssetTrack2`の動画の長さ分を`videoAssetTrack1`の終了時間の後ろに"BGMが終わる残り尺の分"挿入
     [compositionVideoTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, endingVideoRangeDuration)
                                    ofTrack:videoAssetTrack2
                                     atTime:videoAssetTrack1.timeRange.duration
                                      error:nil];
     
-//AudioTrackの並びを編集する。
+    //※↑単純に元動画をクロップして繋ぎ合わせたい場合は、AVMutableCompositionTrackにAVAssetTrackをどんどん追加すれば良い。
     
-//    // ひとつめの音声をトラックに追加
-//    [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrack2.timeRange.duration)
-//                                   ofTrack:audioAssetTrack2
-//                                    atTime:kCMTimeZero
-//                                     error:nil];
-//    // ふたつめの音声を追加
-//    [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrack1.timeRange.duration)
-//                                   ofTrack:audioAssetTrack1
-//                                    atTime:audioAssetTrack2.timeRange.duration
-//                                     error:nil];
+//AudioTrackの並びを編集する
     // BGM用音声をトラックに追加
     [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrackBGM.timeRange.duration)
                                    ofTrack:audioAssetTrackBGM
@@ -151,16 +132,13 @@ const int kVideoFPS = 30;
                                      error:nil];
     
     // 環境音声をトラックに追加
-    [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrackField.timeRange.duration)
+    [compositionFieldTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrackField.timeRange.duration)
                                    ofTrack:audioAssetTrackField
                                     atTime:kCMTimeZero
                                      error:nil];
+
     
-    
-    
-//    テスト。ここも同じように、音声データを追加してみたらどうなるか
-//    で、後述のパラメータ設定でのパーセンテージで、可能にはならないだろうか。
-    
+    //これをそのまま追加しても、後ろにAddされてしまうだけ。
     /*
      TimeRange - 元素材トラックの方のどの範囲(0:30.000〜0:35.000 とか)を使うかを指定する。今回は元素材トラック全体を指定した。
      ofTrack - 元素材トラックを指定
@@ -171,20 +149,14 @@ const int kVideoFPS = 30;
 //生成前の合成処理（映像）
     /////////////////////////////////////////////////////////////////////////////
     // 手順5
-    
-     //AVMutableVideoComposition  : AVMutableCompositionに対する付加情報を設定：フレームの長さやレンダリングサイズ
-    //WIP::ここで再生秒数の長さとか指定している感じ。
-        // - 単純に音をカットしたらどうなるだろうか。最後のサンプルフレームで終了する。
-    
-    //timeRange >> どこのタイムからどこのタイムまでを再生かを指定。
-    //おそらく＞インタラクション、可変の設定用オブジェクトを設定して、その後、compositionVideoTrackに当て込んでいる？
+    //トラック素材を何処に配置して、どういう変化パラメータ情報を設定して、何処に置くか、をここで指定している。
+     //AVMutableVideoComposition, AVMutableAudioComposition  : AVMutableCompositionに対する付加情報を設定：フレームの長さやレンダリングサイズ
     
     // Video1の合成命令用オブジェクトを生成
     AVMutableVideoCompositionInstruction *mutableVideoCompositionInstruction1 = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
-        //タイム範囲を指定
+        //タイム範囲を指定し、背景の指定
         mutableVideoCompositionInstruction1.timeRange = CMTimeRangeMake(kCMTimeZero, videoAssetTrack1.timeRange.duration);
         mutableVideoCompositionInstruction1.backgroundColor = UIColor.redColor.CGColor;
-    
     // Video1のレイヤーの合成命令を生成
     AVMutableVideoCompositionLayerInstruction *videoLayerInstruction1;
         videoLayerInstruction1= [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTrack];
@@ -193,19 +165,21 @@ const int kVideoFPS = 30;
     
     // Video2の合成命令用オブジェクトを生成
     AVMutableVideoCompositionInstruction *mutableVideoCompositionInstruction2 = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
-    //
-//        mutableVideoCompositionInstruction2.timeRange = CMTimeRangeMake(videoAssetTrack1.timeRange.duration, audioAssetTrack.timeRange.duration); //ここは変わらない。
         mutableVideoCompositionInstruction2.timeRange = CMTimeRangeMake(videoAssetTrack1.timeRange.duration, CMTimeAdd(videoAssetTrack1.timeRange.duration, videoAssetTrack2.timeRange.duration));
         mutableVideoCompositionInstruction2.backgroundColor = UIColor.blueColor.CGColor;
-    
     // Video2のレイヤーの合成命令を生成
     AVMutableVideoCompositionLayerInstruction *videoLayerInstruction2;
         videoLayerInstruction2= [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTrack];
         mutableVideoCompositionInstruction2.layerInstructions = @[videoLayerInstruction2];
     
+    
+    //仮説：ここでAudio・Fieldと同様の形で、エンディングとなる動画を当て込めば、良いのでは。
+        //クロスフェードって指定してできるのか。
+        //指定秒数だけ、暗くすることはできるのか。
+        //動画の上にText画像を載せることって出来るのか。
+    
     /////////////////////////////////////////////////////////////////////////////
     // 手順6
-    
     // AVMutableVideoCompositionを生成
     AVMutableVideoComposition *mutableVideoComposition = [AVMutableVideoComposition videoComposition];
     mutableVideoComposition.instructions = @[mutableVideoCompositionInstruction1, mutableVideoCompositionInstruction2];
@@ -219,21 +193,20 @@ const int kVideoFPS = 30;
     // Audioの合成パラメータオブジェクトを生成
     AVMutableAudioMixInputParameters *audioMixInputParametersBGM;
     audioMixInputParametersBGM = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:compositionAudioTrack];
-    //音量可変の設定のみ
-    [audioMixInputParametersBGM setVolume:1.0 atTime:kCMTimeZero];
-    [audioMixInputParametersBGM setVolumeRampFromStartVolume:1.0
-                                              toEndVolume:1.0
+    [audioMixInputParametersBGM setVolumeRampFromStartVolume:0.5
+                                              toEndVolume:0.5
                                                 timeRange:CMTimeRangeMake(kCMTimeZero, mutableComposition.duration)];
-    
-    
-    
-    
+    // Fieldの合成パラメータオブジェクトを生成
+    AVMutableAudioMixInputParameters *audioMixInputParametersField;
+    audioMixInputParametersField = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:compositionFieldTrack];
+    [audioMixInputParametersField setVolumeRampFromStartVolume:0.5
+                                                 toEndVolume:0.5
+                                                   timeRange:CMTimeRangeMake(kCMTimeZero, mutableComposition.duration)];
     /////////////////////////////////////////////////////////////////////////////
     // 手順8
-    
     // AVMutableAudioMixを生成
     AVMutableAudioMix *mutableAudioMix = [AVMutableAudioMix audioMix];
-    mutableAudioMix.inputParameters = @[audioMixInputParametersBGM];
+    mutableAudioMix.inputParameters = @[audioMixInputParametersBGM, audioMixInputParametersField];
     
     
 //__________________________________
@@ -375,7 +348,7 @@ const int kVideoFPS = 30;
 - (NSURL *)videoFileFromFieldRec
 {
     NSBundle *bundle = NSBundle.mainBundle;
-    NSString *path = [bundle pathForResource:@"FieldMovieBGM" ofType:@"mp4"];
+    NSString *path = [bundle pathForResource:@"FieldSound26s" ofType:@"mp4"];
     NSURL *url = [NSURL fileURLWithPath:path];
     return url;
 }
