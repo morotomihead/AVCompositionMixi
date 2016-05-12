@@ -7,6 +7,8 @@
 
 @interface Composition ()
 @property (nonatomic, copy) void (^handler)(NSURL *url);
+@property(nonatomic, strong) AVAsset *videoAsset;
+
 @end
 
 
@@ -21,20 +23,27 @@
     // OK ビデオ環境音を合成した動画の書き出し　（合わせて音量バランス調整）
     // OK 画像から動画を生成して撮影動画ラストにインサートしてコンバート
 
+// AV08ViewController:CrossFade
+
 /*
+ 
+ // Text
+ // Icon
+ 
+ //動画の最終フレームから画像を取得する >> 手法は見えました。
+ //取得した画像にブラーをかける　 >>iOS9Samplerをチェック > 可能だが少々時間かかりそう。
+ //加工した画像の上にText, 画像素材を重ねる
+ //画像を1秒の動画にする
+
+ 
+ 
  AVMutableComposition       : iMovieで言うプロジェクト。このProject内で、各トラックを編集する。
  AVMutableCompositionTrack  : ビデオトラックとオーディオトラックが設定
  AVMutableVideoComposition  : AVMutableCompositionに対する付加情報を設定：フレームの長さやレンダリングサイズ
  AVAssetExportSession       : AVMutableComposition,AVMutableVideoCompositionの情報をAVAssetExportSessionに代入→ビデオのクオリティやアウトプット用のパスなどを設定すればビデオファイルの出来上がり
  
  _____
- 
- 
- １．AVMutableCompositionで編集したい動画を割当て
- ２．AVMutableVideoCompositionInstructionで動画に対する編集内容を設定
- 
- 
- 
+
  AVMutableVideoCompositionをAVPlayerやExportのクラスに渡す事でビデオに付加情報がセットされる。
  */
 
@@ -138,12 +147,12 @@ const int kVideoFPS = 30;
                                      error:nil];
 
     
-    //これをそのまま追加しても、後ろにAddされてしまうだけ。
     /*
      TimeRange - 元素材トラックの方のどの範囲(0:30.000〜0:35.000 とか)を使うかを指定する。今回は元素材トラック全体を指定した。
      ofTrack - 元素材トラックを指定
      atTime - 貼付ける先のトラックのどの位置に貼付けるか
      */
+    
     
 //__________________________________
 //生成前の合成処理（映像）
@@ -165,7 +174,8 @@ const int kVideoFPS = 30;
     
     // Video2の合成命令用オブジェクトを生成
     AVMutableVideoCompositionInstruction *mutableVideoCompositionInstruction2 = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
-        mutableVideoCompositionInstruction2.timeRange = CMTimeRangeMake(videoAssetTrack1.timeRange.duration, CMTimeAdd(videoAssetTrack1.timeRange.duration, videoAssetTrack2.timeRange.duration));
+        mutableVideoCompositionInstruction2.timeRange = CMTimeRangeMake(videoAssetTrack1.timeRange.duration,
+                                                                        CMTimeAdd(videoAssetTrack1.timeRange.duration, videoAssetTrack2.timeRange.duration));
         mutableVideoCompositionInstruction2.backgroundColor = UIColor.blueColor.CGColor;
     // Video2のレイヤーの合成命令を生成
     AVMutableVideoCompositionLayerInstruction *videoLayerInstruction2;
@@ -174,15 +184,71 @@ const int kVideoFPS = 30;
     
     
     //仮説：ここでAudio・Fieldと同様の形で、エンディングとなる動画を当て込めば、良いのでは。
-        //クロスフェードって指定してできるのか。
-        //指定秒数だけ、暗くすることはできるのか。
-        //動画の上にText画像を載せることって出来るのか。
+    //クロスフェードって指定してできるのか。
+    //指定秒数だけ、暗くすることはできるのか。
+    //動画の上にText画像を載せることって出来るのか。
+    //動画の合成の個所で、指定秒数だけ文字をホバーさせれば良いのでは。
+    
+    
+    //最終フレームへの画像合成用オブジェクトを生成
+    //          3.1 - Create AVMutableVideoCompositionInstruction
+    AVMutableVideoCompositionInstruction *mainInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
+        mainInstruction.timeRange = CMTimeRangeMake(videoAssetTrack1.timeRange.duration,
+                                                    CMTimeAdd(videoAssetTrack1.timeRange.duration, videoAssetTrack2.timeRange.duration));
+    //最終フレームへのレイヤーの合成命令を生成
+    AVMutableVideoCompositionLayerInstruction *videolayerInstruction;
+        videolayerInstruction = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTrack];
+    
+    //          3.3 - Add instructions
+    mainInstruction.layerInstructions =  @[videolayerInstruction];  //[NSArray arrayWithObjects:videolayerInstruction,nil];
+    
+    CGSize naturalSize;
+    naturalSize = videoAssetTrack2.naturalSize;
     
     /////////////////////////////////////////////////////////////////////////////
+    
+//    AVMutableVideoCompositionここに追加する予定。
+    
+    
+// WIP :: 時間指定でのコンポジションの設定方法
+    
+    
     // 手順6
     // AVMutableVideoCompositionを生成
     AVMutableVideoComposition *mutableVideoComposition = [AVMutableVideoComposition videoComposition];
     mutableVideoComposition.instructions = @[mutableVideoCompositionInstruction1, mutableVideoCompositionInstruction2];
+    
+    //AVMutableVideoComposition
+    //ここの個所をど忘れしています。WIP:外部のクラスメソッドを呼べない
+    //[self applyVideoEffectsToComposition:mutableVideoComposition size:naturalSize];
+    
+    // 1 - Set up the text layer
+    CATextLayer *subtitle1Text = [[CATextLayer alloc] init];
+    [subtitle1Text setFont:@"Helvetica-Bold"];
+    [subtitle1Text setFontSize:45];
+    [subtitle1Text setFrame:CGRectMake(0, 0, naturalSize.width, naturalSize.height/2)];
+    [subtitle1Text setString:@"本日は晴天なり"];
+    [subtitle1Text setAlignmentMode:kCAAlignmentCenter];
+    [subtitle1Text setForegroundColor:[[UIColor whiteColor] CGColor]];
+    
+    // 2 - The usual overlay
+    CALayer *overlayLayer = [CALayer layer];
+    [overlayLayer addSublayer:subtitle1Text];
+    overlayLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
+    [overlayLayer setMasksToBounds:YES];
+    
+    CALayer *parentLayer = [CALayer layer];
+    CALayer *videoLayer = [CALayer layer];
+    parentLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
+    videoLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
+    [parentLayer addSublayer:videoLayer];
+    [parentLayer addSublayer:overlayLayer];
+    
+    mutableVideoComposition.animationTool = [AVVideoCompositionCoreAnimationTool
+                                 videoCompositionCoreAnimationToolWithPostProcessingAsVideoLayer:videoLayer inLayer:parentLayer];
+    
+
+    
     
 //__________________________________
 //生成前の合成処理（音声）
@@ -376,6 +442,46 @@ const int kVideoFPS = 30;
     NSURL *url       = [NSURL fileURLWithPath:path];
     return url;
 }
+
+//****************************************************************************
+
+//secに秒数を指定すれば、可能。
+- (UIImage *)getThumbImage:(NSURL *)url time:(double)sec	//	指定時間（秒）のサムネイル画像を得る
+{
+    UIImage					*image;
+    AVURLAsset				*asset;
+    AVAssetImageGenerator	*igtr;
+    CMTime					t1,t2;
+    CGImageRef				iref;
+    
+    asset = [AVURLAsset URLAssetWithURL:url options:nil];
+    if(asset)
+    {
+        igtr=[AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
+        if(igtr)
+        {
+            igtr.appliesPreferredTrackTransform=YES;		//	画像の回転を許すか？
+            igtr.requestedTimeToleranceBefore=kCMTimeZero;	//	サムネイルの正確さ（前方）
+            igtr.requestedTimeToleranceAfter=kCMTimeZero;	//	サムネイルの正確さ（後方）
+            t1=CMTimeMakeWithSeconds( sec,NSEC_PER_SEC );
+            iref=[igtr copyCGImageAtTime:t1 actualTime:&t2 error:nil];
+            
+            if(iref)
+            {
+                image = [UIImage imageWithCGImage:iref];
+                CGImageRelease( iref );
+                //timeValue.text=[NSString stringWithFormat:@"Request=%.1f\t\tActual=%.3f",sec,CMTimeGetSeconds( t2 )];
+            }
+        }
+    }
+    return image;
+}
+
+
+
+
+
+
 
 @end
 

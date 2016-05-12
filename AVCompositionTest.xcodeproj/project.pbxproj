@@ -19,6 +19,8 @@
 		608C6DB91B01C108003F694A /* URLHookmark.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 608C6DB71B01C108003F694A /* URLHookmark.mp4 */; };
 		E615F3FA1CE4350100225B22 /* FieldMovieBGM.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E615F3F91CE4350100225B22 /* FieldMovieBGM.mp4 */; };
 		E615F3FC1CE43F0D00225B22 /* FieldSound26s.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E615F3FB1CE43F0D00225B22 /* FieldSound26s.mp4 */; };
+		E615F3FF1CE469CD00225B22 /* StillImageFiltersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E615F3FE1CE469CD00225B22 /* StillImageFiltersViewController.swift */; };
+		E615F4021CE4701E00225B22 /* AddSubtitleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E615F4011CE4701E00225B22 /* AddSubtitleViewController.m */; };
 		E6AA85AE1CE1D10700A586A5 /* Sample_movie-sound.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */; };
 		E6F05B331CE2E44A00654A99 /* CamelliaTestMovie01.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6F05B311CE2E44A00654A99 /* CamelliaTestMovie01.mp4 */; };
 		E6F05B341CE2E44A00654A99 /* CamelliaTestMovie02.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6F05B321CE2E44A00654A99 /* CamelliaTestMovie02.mp4 */; };
@@ -54,6 +56,10 @@
 		608C6DB71B01C108003F694A /* URLHookmark.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = URLHookmark.mp4; sourceTree = "<group>"; };
 		E615F3F91CE4350100225B22 /* FieldMovieBGM.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FieldMovieBGM.mp4; sourceTree = "<group>"; };
 		E615F3FB1CE43F0D00225B22 /* FieldSound26s.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FieldSound26s.mp4; sourceTree = "<group>"; };
+		E615F3FD1CE469CC00225B22 /* AVCompositionTest-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AVCompositionTest-Bridging-Header.h"; sourceTree = "<group>"; };
+		E615F3FE1CE469CD00225B22 /* StillImageFiltersViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StillImageFiltersViewController.swift; sourceTree = "<group>"; };
+		E615F4001CE46FFD00225B22 /* AddSubtitleViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddSubtitleViewController.h; sourceTree = "<group>"; };
+		E615F4011CE4701E00225B22 /* AddSubtitleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddSubtitleViewController.m; sourceTree = "<group>"; };
 		E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Sample_movie-sound.mp4"; sourceTree = "<group>"; };
 		E6F05B311CE2E44A00654A99 /* CamelliaTestMovie01.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = CamelliaTestMovie01.mp4; sourceTree = "<group>"; };
 		E6F05B321CE2E44A00654A99 /* CamelliaTestMovie02.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = CamelliaTestMovie02.mp4; sourceTree = "<group>"; };
@@ -115,6 +121,10 @@
 				608C6D871B008C60003F694A /* Supporting Files */,
 				608C6DB11B008C93003F694A /* Composition.h */,
 				608C6DB21B008C93003F694A /* Composition.m */,
+				E615F4001CE46FFD00225B22 /* AddSubtitleViewController.h */,
+				E615F4011CE4701E00225B22 /* AddSubtitleViewController.m */,
+				E615F3FE1CE469CD00225B22 /* StillImageFiltersViewController.swift */,
+				E615F3FD1CE469CC00225B22 /* AVCompositionTest-Bridging-Header.h */,
 			);
 			path = AVCompositionTest;
 			sourceTree = "<group>";
@@ -189,6 +199,7 @@
 		608C6D7C1B008C60003F694A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = "hiruma-kazuya";
 				TargetAttributes = {
@@ -254,8 +265,10 @@
 			files = (
 				608C6DB31B008C93003F694A /* Composition.m in Sources */,
 				608C6D901B008C60003F694A /* ViewController.m in Sources */,
+				E615F4021CE4701E00225B22 /* AddSubtitleViewController.m in Sources */,
 				608C6D8D1B008C60003F694A /* AppDelegate.m in Sources */,
 				608C6D8A1B008C60003F694A /* main.m in Sources */,
+				E615F3FF1CE469CD00225B22 /* StillImageFiltersViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -381,10 +394,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = AVCompositionTest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "AVCompositionTest/AVCompositionTest-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -392,10 +408,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = AVCompositionTest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "AVCompositionTest/AVCompositionTest-Bridging-Header.h";
 			};
 			name = Release;
 		};
