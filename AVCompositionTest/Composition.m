@@ -55,6 +55,7 @@ const int kVideoFPS = 30;
 {
     
     Float64 duration = 26;
+    Float64 startTimeOfTitleDisplay = 23;
     CMTime rangeDuration = CMTimeMakeWithSeconds(duration, kVideoFPS);
     
     self.handler = handler;
@@ -212,14 +213,12 @@ const int kVideoFPS = 30;
     
 // WIP :: 時間指定でのコンポジションの設定方法
     
-    
     // 手順6
     // AVMutableVideoCompositionを生成
     AVMutableVideoComposition *mutableVideoComposition = [AVMutableVideoComposition videoComposition];
     mutableVideoComposition.instructions = @[mutableVideoCompositionInstruction1, mutableVideoCompositionInstruction2];
     
     //AVMutableVideoComposition
-    //ここの個所をど忘れしています。WIP:外部のクラスメソッドを呼べない
     //[self applyVideoEffectsToComposition:mutableVideoComposition size:naturalSize];
     
     // 1 - Set up the text layer
@@ -230,12 +229,17 @@ const int kVideoFPS = 30;
     [subtitle1Text setString:@"本日は晴天なり"];
     [subtitle1Text setAlignmentMode:kCAAlignmentCenter];
     [subtitle1Text setForegroundColor:[[UIColor whiteColor] CGColor]];
+    //[subtitle1Text setBeginTime:20];  //WIP::ここでも開始時間の指定可能。
     
     // 2 - The usual overlay
     CALayer *overlayLayer = [CALayer layer];
     [overlayLayer addSublayer:subtitle1Text];
     overlayLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
     [overlayLayer setMasksToBounds:YES];
+    
+    //Set title text begin time (WIP::より正確なタイム設定)
+    [overlayLayer setBeginTime:startTimeOfTitleDisplay];
+    //ex http://qiita.com/inamiy/items/bdc0eb403852178c4ea7
     
     CALayer *parentLayer = [CALayer layer];
     CALayer *videoLayer = [CALayer layer];
@@ -247,7 +251,16 @@ const int kVideoFPS = 30;
     mutableVideoComposition.animationTool = [AVVideoCompositionCoreAnimationTool
                                  videoCompositionCoreAnimationToolWithPostProcessingAsVideoLayer:videoLayer inLayer:parentLayer];
     
-
+//    // WIP::生成失敗
+//    // AVMutableVideoComposition
+//    AVMutableVideoCompositionInstruction *instruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
+//    instruction.timeRange = CMTimeRangeMake(kCMTimeZero, rangeDuration);
+//    AVMutableVideoCompositionLayerInstruction *layerInstruction = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTrack];
+//   //[layerInstruction setTrackID:2];
+//    [layerInstruction setOpacity:0.5 atTime:kCMTimeZero];
+//    instruction.layerInstructions = [NSArray arrayWithObject:layerInstruction] ;
+//    //animComp.instructions = [NSArray arrayWithObject:instruction]
+//     mutableVideoComposition.instructions = @[mutableVideoCompositionInstruction1, mutableVideoCompositionInstruction2, instruction];
     
     
 //__________________________________
