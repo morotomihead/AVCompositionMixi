@@ -22,6 +22,8 @@
     // OK サウンドの長さ主体で、動画を切る
     // OK ビデオ環境音を合成した動画の書き出し　（合わせて音量バランス調整）
     // OK 画像から動画を生成して撮影動画ラストにインサートしてコンバート
+    // OK ビデオ上に指定した秒数よりテキストを重ねて動画生成
+    // OK
 
 // AV08ViewController:CrossFade
 
@@ -55,7 +57,7 @@ const int kVideoFPS = 30;
 {
     
     Float64 duration = 26;
-    Float64 startTimeOfTitleDisplay = 23;
+    Float64 startTimeOfTitleDisplay = 22;
     CMTime rangeDuration = CMTimeMakeWithSeconds(duration, kVideoFPS);
     
     self.handler = handler;
@@ -183,13 +185,7 @@ const int kVideoFPS = 30;
         videoLayerInstruction2= [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTrack];
         mutableVideoCompositionInstruction2.layerInstructions = @[videoLayerInstruction2];
     
-    
-    //仮説：ここでAudio・Fieldと同様の形で、エンディングとなる動画を当て込めば、良いのでは。
-    //クロスフェードって指定してできるのか。
-    //指定秒数だけ、暗くすることはできるのか。
-    //動画の上にText画像を載せることって出来るのか。
-    //動画の合成の個所で、指定秒数だけ文字をホバーさせれば良いのでは。
-    
+    // --------------------------------------------- //
     
     //最終フレームへの画像合成用オブジェクトを生成
     //          3.1 - Create AVMutableVideoCompositionInstruction
@@ -208,39 +204,142 @@ const int kVideoFPS = 30;
     
     /////////////////////////////////////////////////////////////////////////////
     
-//    AVMutableVideoCompositionここに追加する予定。
-    
-    
-// WIP :: 時間指定でのコンポジションの設定方法
-    
     // 手順6
     // AVMutableVideoCompositionを生成
     AVMutableVideoComposition *mutableVideoComposition = [AVMutableVideoComposition videoComposition];
     mutableVideoComposition.instructions = @[mutableVideoCompositionInstruction1, mutableVideoCompositionInstruction2];
     
-    //AVMutableVideoComposition
-    //[self applyVideoEffectsToComposition:mutableVideoComposition size:naturalSize];
+/////////////////////////////////////////////////////////////////////////////
+    // エンディング・レイヤーの生成
+/////////////////////////////////////////////////////////////////////////////
     
-    // 1 - Set up the text layer
+    // 1-1 - Set up the text layer
     CATextLayer *subtitle1Text = [[CATextLayer alloc] init];
     [subtitle1Text setFont:@"Helvetica-Bold"];
-    [subtitle1Text setFontSize:45];
-    [subtitle1Text setFrame:CGRectMake(0, 0, naturalSize.width, naturalSize.height/2)];
-    [subtitle1Text setString:@"本日は晴天なり"];
+    [subtitle1Text setFontSize:60];
+    [subtitle1Text setFrame:CGRectMake(0, 0, naturalSize.width, naturalSize.height/2+20)];
+    [subtitle1Text setString:@"チャリで来た。"];
     [subtitle1Text setAlignmentMode:kCAAlignmentCenter];
     [subtitle1Text setForegroundColor:[[UIColor whiteColor] CGColor]];
-    //[subtitle1Text setBeginTime:20];  //WIP::ここでも開始時間の指定可能。
     
+    //Set title text begin time (WIP::より正確なタイム設定)
+    [subtitle1Text setBeginTime:startTimeOfTitleDisplay];
+    
+// 動画キャプションのよる画像ファイル生成
+    AVAssetImageGenerator *imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:videoAsset2];
+    imageGenerator.requestedTimeToleranceBefore = kCMTimeZero;
+    imageGenerator.requestedTimeToleranceAfter = kCMTimeZero;
+    
+    Float64 assetDuration = dulation;   //Float64 assetDuration = CMTimeGetSeconds([videoAsset2 duration]);
+    //    Float64 dulation = audioDuration - mainVideoDuration;
+    //    CMTime endingVideoRangeDuration = CMTimeMakeWithSeconds(dulation, kVideoFPS);
+    
+    NSError *error;
+    CMTime actualTime;
+    NSMutableArray *images = [NSMutableArray array];
+    CMTime point = CMTimeMakeWithSeconds(assetDuration, NSEC_PER_SEC);
+    CGImageRef image = [imageGenerator copyCGImageAtTime:point actualTime:&actualTime error:&error];
+    if(!error) {
+        [images addObject:[UIImage imageWithCGImage:image]];
+        CGImageRelease(image);
+    }
+    
+    //ex : 動画画像生成
+    //http://appstars.jp/archive/650
+    
+// Blur Effect処理 ------------------
+    UIImage *originalImage = images[0]; //WIP: UIImageにせずに処理可能にする
+    CIImage *imageToBlur = [CIImage imageWithCGImage:originalImage.CGImage];
+    CIFilter *gaussianBlurFilter = [CIFilter filterWithName: @"CIGaussianBlur"];
+    [gaussianBlurFilter setValue:imageToBlur forKey: @"inputImage"];
+    [gaussianBlurFilter setValue:[NSNumber numberWithFloat: 10] forKey: @"inputRadius"]; //change number to increase/decrease blur
+    CIImage *outputImage = [gaussianBlurFilter outputImage];
+    CIContext *context = [CIContext contextWithOptions:nil];
+    CGImageRef cgimg = [context createCGImage:outputImage fromRect:[imageToBlur extent]];
+    // note, use input image extent if you want it the same size, the output image extent is larger
+    
+    UIImage *convertedImage = [UIImage imageWithCGImage:cgimg];
+    
+    //WIP:: 後にメソッド化
+    
+    //ex : convertToBlurImage
+    //http://findnerd.com/list/view/Blur-image-using-objective-c-and-swift/4213/
+    
+    
+// GPS情報 ------------------
+    CATextLayer *gpsInfoText = [[CATextLayer alloc] init];
+    [gpsInfoText setFont:@"Helvetica-Bold"];
+    [gpsInfoText setFontSize:50];
+    [gpsInfoText setFrame:CGRectMake(0, 0, naturalSize.width, naturalSize.height/2 + 100)];
+    [gpsInfoText setString:@"東京ソラマチ (スカイツリータウン)"];  //東京都墨田区押上一丁目1番2号 \n東京都墨田区押上一丁目1番2号
+    [gpsInfoText setAlignmentMode:kCAAlignmentCenter];
+    [gpsInfoText setForegroundColor:[[UIColor whiteColor] CGColor]];
+    
+    CATextLayer *addressInfoText = [[CATextLayer alloc] init];
+    [addressInfoText setFontSize:30];
+    [addressInfoText setFrame:CGRectMake(0, 0, naturalSize.width, naturalSize.height/2)];
+    [addressInfoText setString:@"東京都墨田区押上一丁目1番2号"];  //東京都墨田区押上一丁目1番2号 \n東京都墨田区押上一丁目1番2号
+    [addressInfoText setAlignmentMode:kCAAlignmentCenter];
+    [addressInfoText setForegroundColor:[[UIColor whiteColor] CGColor]];
+    
+// LOGO Picture ------------
+    
+    CALayer *logoLayer = [CALayer layer];
+    UIImage *logoImage = [UIImage imageNamed:@"ORSO-Logo.png"];
+    [logoLayer setContents:(id)[logoImage CGImage]];
+    //logoLayer.frame = CGRectMake(0, 0, 216, 84);    //DiscoveryCamera Logo
+    logoLayer.frame = CGRectMake(0, 0, 120, 120);    //ORSO Logo
+    [logoLayer setPosition:CGPointMake(naturalSize.width/2, naturalSize.height/4)];
+    
+    
+// エンディング画像レイヤー設定
+    
+    //Add BackGround Blur Picture
+    CALayer *endingLayer = [CALayer layer];
+    [endingLayer setBackgroundColor:[[UIColor blackColor] CGColor]];
+    [endingLayer setContents:(id)[convertedImage CGImage]];
+    
+    //Add GPS Info
+    [endingLayer addSublayer:gpsInfoText];
+    [endingLayer addSublayer:addressInfoText];
+    
+    //Add LOGO Image
+    [endingLayer addSublayer:logoLayer];
+    
+    endingLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
+    [endingLayer setMasksToBounds:YES];
+    [endingLayer setBeginTime:startTimeOfTitleDisplay+2];
+    
+    //FadeIn Animation (Testing)
+    // WIP::
+//    CABasicAnimation *fadeInAndOut = [CABasicAnimation animationWithKeyPath:@"opacity"];
+//    fadeInAndOut.duration = 0.5;
+//    fadeInAndOut.autoreverses = YES;
+//    fadeInAndOut.fromValue = [NSNumber numberWithFloat:0.0];
+//    fadeInAndOut.toValue = [NSNumber numberWithFloat:1.0];
+//    fadeInAndOut.repeatCount = HUGE_VALF;
+//    fadeInAndOut.fillMode = kCAFillModeBoth;
+//    [endingLayer addAnimation:fadeInAndOut forKey:@"myanimation"];
+    
+    
+    
+    
+    
+    
+//　設定用のCALayerを１つにまとめる ------------------
     // 2 - The usual overlay
     CALayer *overlayLayer = [CALayer layer];
     [overlayLayer addSublayer:subtitle1Text];
+    [overlayLayer addSublayer:endingLayer];
+    
     overlayLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
     [overlayLayer setMasksToBounds:YES];
     
-    //Set title text begin time (WIP::より正確なタイム設定)
-    [overlayLayer setBeginTime:startTimeOfTitleDisplay];
+    //WIP:: アニメーション詳細設定
     //ex http://qiita.com/inamiy/items/bdc0eb403852178c4ea7
     
+    
+// mutableVideoCompositionのアニメーションに作成したCALayer処理を設定 ------------------
     CALayer *parentLayer = [CALayer layer];
     CALayer *videoLayer = [CALayer layer];
     parentLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
@@ -251,17 +350,12 @@ const int kVideoFPS = 30;
     mutableVideoComposition.animationTool = [AVVideoCompositionCoreAnimationTool
                                  videoCompositionCoreAnimationToolWithPostProcessingAsVideoLayer:videoLayer inLayer:parentLayer];
     
-//    // WIP::生成失敗
-//    // AVMutableVideoComposition
-//    AVMutableVideoCompositionInstruction *instruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
-//    instruction.timeRange = CMTimeRangeMake(kCMTimeZero, rangeDuration);
-//    AVMutableVideoCompositionLayerInstruction *layerInstruction = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTrack];
-//   //[layerInstruction setTrackID:2];
-//    [layerInstruction setOpacity:0.5 atTime:kCMTimeZero];
-//    instruction.layerInstructions = [NSArray arrayWithObject:layerInstruction] ;
-//    //animComp.instructions = [NSArray arrayWithObject:instruction]
-//     mutableVideoComposition.instructions = @[mutableVideoCompositionInstruction1, mutableVideoCompositionInstruction2, instruction];
     
+
+    
+    
+
+
     
 //__________________________________
 //生成前の合成処理（音声）
@@ -391,13 +485,6 @@ const int kVideoFPS = 30;
         }
     }];
 }
-
-//MARK:: TEST MIX DATA
-    //1. 作成した動画にて、自由にコントロールしてみる。
-    //2. 動画に『音楽で」当て込んでみる。
-        //その知識を基に、ライブラリの仕様を確認
-        //実実装を試す。
-
 
 - (NSURL *)movieFileMain
 {

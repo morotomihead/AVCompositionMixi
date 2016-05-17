@@ -22,6 +22,8 @@
 		E615F3FF1CE469CD00225B22 /* StillImageFiltersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E615F3FE1CE469CD00225B22 /* StillImageFiltersViewController.swift */; };
 		E615F4021CE4701E00225B22 /* AddSubtitleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E615F4011CE4701E00225B22 /* AddSubtitleViewController.m */; };
 		E6AA85AE1CE1D10700A586A5 /* Sample_movie-sound.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */; };
+		E6D3F6D61CEAD127001204FE /* TestLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = E6D3F6D51CEAD127001204FE /* TestLogo.png */; };
+		E6D3F6D81CEAD4DB001204FE /* ORSO-Logo.png in Resources */ = {isa = PBXBuildFile; fileRef = E6D3F6D71CEAD4DB001204FE /* ORSO-Logo.png */; };
 		E6F05B331CE2E44A00654A99 /* CamelliaTestMovie01.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6F05B311CE2E44A00654A99 /* CamelliaTestMovie01.mp4 */; };
 		E6F05B341CE2E44A00654A99 /* CamelliaTestMovie02.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = E6F05B321CE2E44A00654A99 /* CamelliaTestMovie02.mp4 */; };
 /* End PBXBuildFile section */
@@ -61,6 +63,8 @@
 		E615F4001CE46FFD00225B22 /* AddSubtitleViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddSubtitleViewController.h; sourceTree = "<group>"; };
 		E615F4011CE4701E00225B22 /* AddSubtitleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddSubtitleViewController.m; sourceTree = "<group>"; };
 		E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Sample_movie-sound.mp4"; sourceTree = "<group>"; };
+		E6D3F6D51CEAD127001204FE /* TestLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TestLogo.png; sourceTree = "<group>"; };
+		E6D3F6D71CEAD4DB001204FE /* ORSO-Logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ORSO-Logo.png"; sourceTree = "<group>"; };
 		E6F05B311CE2E44A00654A99 /* CamelliaTestMovie01.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = CamelliaTestMovie01.mp4; sourceTree = "<group>"; };
 		E6F05B321CE2E44A00654A99 /* CamelliaTestMovie02.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = CamelliaTestMovie02.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -118,6 +122,8 @@
 				E6AA85AD1CE1D10700A586A5 /* Sample_movie-sound.mp4 */,
 				608C6DB61B01C108003F694A /* FurShader.mp4 */,
 				608C6DB71B01C108003F694A /* URLHookmark.mp4 */,
+				E6D3F6D51CEAD127001204FE /* TestLogo.png */,
+				E6D3F6D71CEAD4DB001204FE /* ORSO-Logo.png */,
 				608C6D871B008C60003F694A /* Supporting Files */,
 				608C6DB11B008C93003F694A /* Composition.h */,
 				608C6DB21B008C93003F694A /* Composition.m */,
@@ -240,11 +246,13 @@
 				608C6DB91B01C108003F694A /* URLHookmark.mp4 in Resources */,
 				E615F3FC1CE43F0D00225B22 /* FieldSound26s.mp4 in Resources */,
 				608C6D931B008C60003F694A /* Main.storyboard in Resources */,
+				E6D3F6D61CEAD127001204FE /* TestLogo.png in Resources */,
 				608C6D981B008C60003F694A /* LaunchScreen.xib in Resources */,
 				E6F05B331CE2E44A00654A99 /* CamelliaTestMovie01.mp4 in Resources */,
 				608C6D951B008C60003F694A /* Images.xcassets in Resources */,
 				E615F3FA1CE4350100225B22 /* FieldMovieBGM.mp4 in Resources */,
 				E6AA85AE1CE1D10700A586A5 /* Sample_movie-sound.mp4 in Resources */,
+				E6D3F6D81CEAD4DB001204FE /* ORSO-Logo.png in Resources */,
 				608C6DB81B01C108003F694A /* FurShader.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
