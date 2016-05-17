@@ -55,10 +55,14 @@ const int kVideoFPS = 30;
 
 - (void)create:(void (^)(NSURL *url))handler
 {
-    
+    /*
     Float64 duration = 26;
-    Float64 startTimeOfTitleDisplay = 22;
     CMTime rangeDuration = CMTimeMakeWithSeconds(duration, kVideoFPS);
+    */
+    
+    Float64 startTimeOfTitleDisplay = 22;
+    Float64 TitleDisplayDurationTime = 2;
+    CMTime  TitleDisplayDurationCMTime = CMTimeMakeWithSeconds(TitleDisplayDurationTime, kVideoFPS);
     
     self.handler = handler;
     
@@ -137,7 +141,7 @@ const int kVideoFPS = 30;
     //※↑単純に元動画をクロップして繋ぎ合わせたい場合は、AVMutableCompositionTrackにAVAssetTrackをどんどん追加すれば良い。
     
 //AudioTrackの並びを編集する
-    // BGM用音声をトラックに追加
+    // BGM用音声をトラックに追加   //CMTimeAdd(audioAssetTrackBGM.timeRange.duration,endingSpaceCMTime)
     [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, audioAssetTrackBGM.timeRange.duration)
                                    ofTrack:audioAssetTrackBGM
                                     atTime:kCMTimeZero
@@ -230,7 +234,7 @@ const int kVideoFPS = 30;
     imageGenerator.requestedTimeToleranceBefore = kCMTimeZero;
     imageGenerator.requestedTimeToleranceAfter = kCMTimeZero;
     
-    Float64 assetDuration = dulation;   //Float64 assetDuration = CMTimeGetSeconds([videoAsset2 duration]);
+    Float64 assetDuration = dulation - TitleDisplayDurationTime ;   //Float64 assetDuration = CMTimeGetSeconds([videoAsset2 duration]);
     //    Float64 dulation = audioDuration - mainVideoDuration;
     //    CMTime endingVideoRangeDuration = CMTimeMakeWithSeconds(dulation, kVideoFPS);
     
@@ -312,23 +316,62 @@ const int kVideoFPS = 30;
     
     //FadeIn Animation (Testing)
     // WIP::
-//    CABasicAnimation *fadeInAndOut = [CABasicAnimation animationWithKeyPath:@"opacity"];
-//    fadeInAndOut.duration = 0.5;
-//    fadeInAndOut.autoreverses = YES;
-//    fadeInAndOut.fromValue = [NSNumber numberWithFloat:0.0];
-//    fadeInAndOut.toValue = [NSNumber numberWithFloat:1.0];
-//    fadeInAndOut.repeatCount = HUGE_VALF;
-//    fadeInAndOut.fillMode = kCAFillModeBoth;
-//    [endingLayer addAnimation:fadeInAndOut forKey:@"myanimation"];
+
+    
+//    
+//    CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+//    fadeAnimation.fromValue = [NSNumber numberWithFloat:(float)0.0];
+//    fadeAnimation.toValue = [NSNumber numberWithFloat:(float)0.9];
+////    fadeAnimation.additive = NO;
+////    fadeAnimation.removedOnCompletion = NO;
+////    [fadeAnimation setBeginTime:CACurrentMediaTime() + 0.09];
+//    fadeAnimation.duration = 1;
+////    fadeAnimation.fillMode = kCAFillModeBoth;
+//    
+//    endingLayer.opacity = 0.6;
+//    [endingLayer addAnimation:fadeAnimation forKey:@"FadeAnimation"];
+//    
+    
+    ///
+    
+    
+//    // Animationを設定する
+//    - タイムをきちんと設定して、動画終わりの２秒・１秒で表示出来るようにする。
+
+    
+//    let fadeAnimation = CABasicAnimation(keyPath: "opacity")
+//    fadeAnimation.fromValue = 1.0
+//    fadeAnimation.toValue = 0.0
+//    fadeAnimation.duration = 1
+//    fadeAnimation.repeatCount = Float(Int.max)
+//    
+//    // 7
+//    instanceLayer.opacity = 0.0
+//    instanceLayer.addAnimation(fadeAnimation, forKey: "FadeAnimation")
     
     
     
+// WIP:: Custom Original CALayer＆CoreImage's Filter ------------
+    
+//    CALayer* sepiaLayer = [CALayer layer];
+//    sepiaLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
+//    CIFilter *myFilter = [CIFilter filterWithName:@"CISepiaTone"];
+//    [myFilter setDefaults];
+//    [myFilter setValue:[NSNumber numberWithFloat:0.8f] forKey:@"inputIntensity"];
+//    [sepiaLayer setFilters:@[myFilter]];
+//    
+//    //CIFilter *ciFilter = [CIFilter filterWithName:@"CIPhotoEffectMono"];
+//    //[sepiaLayer setFilters:@[ciFilter]];
+//    
+//    //[sepiaLayer setBackgroundColor:[[UIColor  blackColor]CGColor]];
     
     
     
 //　設定用のCALayerを１つにまとめる ------------------
     // 2 - The usual overlay
     CALayer *overlayLayer = [CALayer layer];
+    
+    //[overlayLayer addSublayer:sepiaLayer];      //WIP::FilterTest
     [overlayLayer addSublayer:subtitle1Text];
     [overlayLayer addSublayer:endingLayer];
     
@@ -342,6 +385,9 @@ const int kVideoFPS = 30;
 // mutableVideoCompositionのアニメーションに作成したCALayer処理を設定 ------------------
     CALayer *parentLayer = [CALayer layer];
     CALayer *videoLayer = [CALayer layer];
+    
+    //[videoLayer addSublayer:sepiaLayer];  //WIP::FilterTest
+    
     parentLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
     videoLayer.frame = CGRectMake(0, 0, naturalSize.width, naturalSize.height);
     [parentLayer addSublayer:videoLayer];
